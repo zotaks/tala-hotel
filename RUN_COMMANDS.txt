@@ -1,0 +1,106 @@
+================================================================
+  TALA HOTEL - HOW TO RUN IT ON ANOTHER LAPTOP  (easy version)
+================================================================
+
+There are only 3 parts:
+   PART 1  on THIS laptop   -> make a package (1 double-click)
+   PART 2  on the OTHER laptop -> install it (1 double-click)
+   PART 3  log in
+
+
+----------------------------------------------------------------
+ PART 1 - ON THIS LAPTOP (the one where the app already works)
+----------------------------------------------------------------
+ 1. Open the XAMPP Control Panel. Click START on Apache and MySQL
+    (they turn green). This lets your bookings be copied too.
+
+ 2. Open the  tala_hotel  folder and double-click:
+        4_MAKE_PORTABLE_PACKAGE.bat
+    Wait 1-2 minutes until it says DONE.
+
+ 3. A new folder called  Tala_Portable  appears.
+    Copy that folder to a USB drive or Google Drive.
+
+
+----------------------------------------------------------------
+ PART 2 - ON THE OTHER LAPTOP
+----------------------------------------------------------------
+ 1. Install XAMPP:  https://www.apachefriends.org
+    (Download for Windows -> open the file -> click Next until finished)
+
+ 2. Open the XAMPP Control Panel (Start menu -> type XAMPP).
+    Click START next to Apache and next to MySQL.
+    Wait until both turn GREEN.
+
+ 3. Copy the  Tala_Portable  folder onto the laptop (e.g. the Desktop),
+    open it, and double-click:
+        INSTALL.bat
+    (If a blue Windows warning appears: click "More info" -> "Run anyway")
+
+ 4. The app opens by itself at:
+        http://localhost/tala/
+    Bookmark this page.
+
+ That's it. No Flutter or coding tools are needed on the other laptop.
+
+
+----------------------------------------------------------------
+ EVERY TIME YOU USE IT
+----------------------------------------------------------------
+ 1. Open XAMPP Control Panel -> START Apache and MySQL (green).
+ 2. Open your bookmark  http://localhost/tala/
+ 3. When finished, you can click STOP in XAMPP.
+
+ All bookings and accounts are saved automatically.
+
+
+----------------------------------------------------------------
+ PART 3 - LOGIN INFORMATION
+----------------------------------------------------------------
+ GUESTS
+   Use the normal login form, or click "Create an account".
+   Sample guest:  juan.delacruz@gmail.com   password: password123
+
+ ADMIN DASHBOARD (hotel staff)
+   Use the SAME login page as guests - no extra button needed.
+   1. Type the staff email and password below, then click  "Log in".
+   2. The dashboard opens automatically (owner, manager or front desk).
+   3. The FIRST time only, you must make your own new password.
+
+   +-------------+--------------------------+-------------------+
+   | Who         | Email                    | First password    |
+   +-------------+--------------------------+-------------------+
+   | OWNER       | admin@talahotel.ph       | admin123          |
+   | MANAGER     | manager@talahotel.ph     | manager123        |
+   | FRONT DESK  | frontdesk@talahotel.ph   | desk1234          |
+   +-------------+--------------------------+-------------------+
+   OWNER can do everything (best for presenting).
+
+   Write your new passwords here (keep this private):
+     Owner      : ____________________
+     Manager    : ____________________
+     Front desk : ____________________
+
+   Good to know:
+   - 5 wrong passwords = locked for 15 minutes. Just wait.
+   - Staff are logged out after 10 minutes of not using the app.
+   - Passwords need at least 8 characters, with letters AND numbers.
+
+
+----------------------------------------------------------------
+ IF SOMETHING GOES WRONG
+----------------------------------------------------------------
+ Problem                              What to do
+ -----------------------------------  ---------------------------------------------
+ "Can't reach the database"           Start Apache AND MySQL in XAMPP (both green).
+ The page won't open                  Apache is not green -> click START next to it.
+ Apache won't turn green              Close Skype / restart the laptop, try again.
+ INSTALL.bat says MySQL not running   Start MySQL in XAMPP, double-click INSTALL.bat again.
+ No pictures                          Connect the laptop to the internet.
+ Forgot the OWNER password            Ask the person who set up the system - see
+                                      RUN_COMMANDS_DETAILED.txt, STEP 8 (reset command).
+ 4_MAKE_PORTABLE_PACKAGE.bat failed   Take a photo of the red message and send it.
+
+ For the full technical guide (installing Flutter, all commands, backups):
+ open  RUN_COMMANDS_DETAILED.txt
+================================================================

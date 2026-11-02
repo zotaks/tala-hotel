@@ -1,0 +1,214 @@
+================================================================
+ TALA HOTEL - COMMANDS TO RUN THE SYSTEM ON ANOTHER LAPTOP
+ (Windows · type the commands in PowerShell)
+================================================================
+
+Open PowerShell: Start menu -> type "PowerShell" -> Enter.
+Lines starting with  #  are notes - don't type them.
+Replace  YOUR-NAME  with the Windows user name on that laptop.
+
+
+----------------------------------------------------------------
+ STEP 0. What the laptop needs (install once)
+----------------------------------------------------------------
+ 1. Google Chrome          https://www.google.com/chrome
+ 2. Git for Windows        https://git-scm.com/download/win      (Flutter needs it)
+ 3. XAMPP (Apache+MySQL)   https://www.apachefriends.org         (install to C:\xampp)
+ 4. Flutter SDK            https://docs.flutter.dev/get-started/install/windows
+      - download the Flutter zip, extract it so you have  C:\src\flutter\bin\flutter.bat
+
+ # Add Flutter to PATH (run once, then CLOSE and REOPEN PowerShell):
+ [Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable("Path", "User") + ";C:\src\flutter\bin", "User")
+
+ # Check that everything is found:
+ flutter --version
+ flutter doctor
+ # "Chrome - develop for the web" must have a green check. Android/Visual Studio warnings can be ignored.
+
+
+----------------------------------------------------------------
+ STEP 1. Copy the project to the laptop
+----------------------------------------------------------------
+ # Copy the extracted "tala_hotel" folder (from Tala_Hotel_Complete.zip) to, for example:
+ #   C:\Users\YOUR-NAME\Desktop\hotel booking\tala_hotel
+ # Do NOT copy the "build" or ".dart_tool" folders from the old laptop - they are rebuilt.
+
+ cd "C:\Users\YOUR-NAME\Desktop\hotel booking\tala_hotel"
+
+
+----------------------------------------------------------------
+ STEP 2. Start XAMPP
+----------------------------------------------------------------
+ # Open "XAMPP Control Panel" -> click Start for Apache and for MySQL (both turn green).
+ # Or from PowerShell:
+ Start-Process "C:\xampp\xampp-control.exe"
+
+
+----------------------------------------------------------------
+ STEP 3. Put the API into XAMPP and create the database
+----------------------------------------------------------------
+ # (Shortcut: double-click 1_SETUP_XAMPP.bat in the project folder - it does 3a and 3b.)
+
+ # 3a. Copy the PHP API into XAMPP
+ Copy-Item -Recurse -Force .\xampp\htdocs\tala_api C:\xampp\htdocs\
+
+ # 3b. Create the tala_hotel database with all tables + starting data
+ #     WARNING: this deletes an existing tala_hotel database. Run it only once.
+ #     (If you are moving records from the old laptop, skip 3b and do STEP 7 instead.)
+ C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4 -e "source xampp/database/tala_hotel.sql"
+
+ # 3c. Check the API works  (should show  "ok":true)
+ Start-Process "http://localhost/tala_api/"
+
+
+----------------------------------------------------------------
+ STEP 4. Run the app
+----------------------------------------------------------------
+ flutter pub get
+ flutter create . --platforms web        # only needed if the "web" folder is missing
+ flutter run -d chrome
+
+ # Optional checks
+ flutter analyze                          # should say: No issues found!
+ flutter test                             # runs the 13 booking + security tests
+
+ # Shortcut: double-click 2_RUN_APP.bat
+
+
+----------------------------------------------------------------
+ STEP 5. (Optional) Put the finished app inside XAMPP
+----------------------------------------------------------------
+ flutter build web --release --base-href /tala/
+ Remove-Item -Recurse -Force C:\xampp\htdocs\tala -ErrorAction SilentlyContinue
+ Copy-Item -Recurse .\build\web C:\xampp\htdocs\tala
+ Start-Process "http://localhost/tala/"
+
+ # Shortcut: double-click 3_BUILD_FOR_XAMPP.bat
+ # Other phones/laptops on the same Wi-Fi: open  http://THIS-LAPTOP-IP/tala/
+ # Find the IP with:
+ ipconfig | findstr IPv4
+ # ...and in the app tap the server button and use  http://THIS-LAPTOP-IP/tala_api/api.php
+
+
+----------------------------------------------------------------
+ STEP 6. Check that records are being saved
+----------------------------------------------------------------
+ C:\xampp\mysql\bin\mysql.exe -u root tala_hotel -e "SELECT code, status, check_in, total FROM bookings ORDER BY id DESC LIMIT 5;"
+ C:\xampp\mysql\bin\mysql.exe -u root tala_hotel -e "SELECT id, name, email, role, staff_role, active, must_change_password FROM users;"
+ C:\xampp\mysql\bin\mysql.exe -u root tala_hotel -e "SELECT email, success, reason, ip, created_at FROM login_attempts ORDER BY id DESC LIMIT 10;"
+ C:\xampp\mysql\bin\mysql.exe -u root tala_hotel -e "SELECT user_name, action, details, created_at FROM audit_log ORDER BY id DESC LIMIT 10;"
+
+ # Or browse the tables:
+ Start-Process "http://localhost/phpmyadmin"
+
+
+----------------------------------------------------------------
+ STEP 7. Move your EXISTING records from the old laptop
+----------------------------------------------------------------
+ # ON THE OLD LAPTOP (XAMPP MySQL running), in the project folder:
+ C:\xampp\mysql\bin\mysqldump.exe -u root --default-character-set=utf8mb4 --databases tala_hotel --result-file=tala_backup.sql
+ # -> copy tala_backup.sql to the new laptop's project folder (USB / Google Drive)
+
+ # ON THE NEW LAPTOP (after STEP 3a, instead of STEP 3b):
+ C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4 -e "source tala_backup.sql"
+
+ # Note: use --result-file (not ">") - PowerShell's ">" saves the file in the wrong encoding.
+
+
+----------------------------------------------------------------
+ STEP 8. ADMIN DASHBOARD LOGIN
+----------------------------------------------------------------
+ HOW TO OPEN THE ADMIN DASHBOARD
+   1. Run the app (STEP 4) or open http://localhost/tala/ (STEP 5).
+   2. Use the normal login page (the same one guests use).
+   3. Enter the staff email + password below and click "Log in".
+      The app sees it is a staff account and opens the dashboard.
+   4. FIRST SIGN-IN ONLY: the app asks you to set your own password
+      (type the starting password once, then your new password twice).
+      The dashboard stays locked until this is done.
+
+ STARTING STAFF ACCOUNTS  (created by tala_hotel.sql)
+ +--------------+--------------------------+--------------+------------------------------------------+
+ | Role         | Email                    | Start passw. | Can do                                   |
+ +--------------+--------------------------+--------------+------------------------------------------+
+ | OWNER        | admin@talahotel.ph       | admin123     | Everything + staff accounts, login       |
+ |              |                          |              | activity, audit log, change privileges   |
+ | MANAGER      | manager@talahotel.ph     | manager123   | Everything except staff accounts         |
+ | FRONT DESK   | frontdesk@talahotel.ph   | desk1234     | View/confirm/check-in/check-out bookings,|
+ |              |                          |              | guest list (no prices/rooms/revenue)     |
+ | (disabled)   | ben.aquino@talahotel.ph  | -            | Cannot sign in (example of a disabled    |
+ |              |                          |              | account - Owner can enable it)           |
+ +--------------+--------------------------+--------------+------------------------------------------+
+ Use the OWNER account for your presentation - it shows every admin screen.
+
+ GUEST ACCOUNTS (for testing the customer side, normal login form)
+   juan.delacruz@gmail.com / password123   (has bookings)
+   ana.reyes@gmail.com     / password123
+   ...or click "Create an account" to make a new guest.
+
+ WRITE YOUR NEW PASSWORDS HERE (keep this paper private):
+   Owner      admin@talahotel.ph       new password: ______________________
+   Manager    manager@talahotel.ph     new password: ______________________
+   Front desk frontdesk@talahotel.ph   new password: ______________________
+
+ SECURITY RULES TO REMEMBER
+   - 5 wrong passwords in 15 minutes = account locked for 15 minutes.
+   - Staff are signed out after 10 minutes without activity, and after 12 hours.
+   - Passwords need 8+ characters with letters AND numbers.
+   - Every staff sign-in and action is recorded (Account -> Login activity / Audit log).
+
+ ADD OR CHANGE STAFF (inside the app, signed in as OWNER)
+   Account tab -> "Staff & privileges" -> the + button (add) or tap a person (edit).
+   You must re-enter YOUR password to save. New staff get a starting password and
+   must change it at their first sign-in.
+
+ FORGOT THE OWNER PASSWORD / OWNER ACCOUNT LOCKED  (PowerShell, XAMPP MySQL running)
+   # Resets admin@talahotel.ph to "admin123", unlocks it, signs it out everywhere.
+   # The owner must choose a new password again at the next sign-in.
+   $h = C:\xampp\php\php.exe -r "echo password_hash('admin123', PASSWORD_DEFAULT);"
+   C:\xampp\mysql\bin\mysql.exe -u root tala_hotel -e "UPDATE users SET password_hash='$h', must_change_password=1, active=1 WHERE email='admin@talahotel.ph'; DELETE FROM login_attempts WHERE email='admin@talahotel.ph' AND success=0; DELETE FROM sessions WHERE user_id=(SELECT id FROM users WHERE email='admin@talahotel.ph');"
+
+   # Only unlock a locked account (keeps the password) - change the email as needed:
+   C:\xampp\mysql\bin\mysql.exe -u root tala_hotel -e "DELETE FROM login_attempts WHERE email='frontdesk@talahotel.ph' AND success=0;"
+
+   # See all staff accounts and their status:
+   C:\xampp\mysql\bin\mysql.exe -u root tala_hotel -e "SELECT id, name, email, staff_role, active, must_change_password, last_login_at FROM users WHERE role='admin';"
+
+
+----------------------------------------------------------------
+ TROUBLESHOOTING
+----------------------------------------------------------------
+ "flutter is not recognized"
+     -> PATH not set or PowerShell not reopened. Repeat the PATH command in STEP 0, reopen PowerShell.
+
+ App says "Can't reach the database"
+     -> Apache or MySQL is not started in XAMPP, or STEP 3a was skipped.
+     -> Test:  Start-Process "http://localhost/tala_api/"
+
+ Apache won't start (port 80 busy)
+     -> See what uses port 80:
+        netstat -ano | findstr :80
+     -> Close Skype/IIS/other web servers, or in XAMPP: Config -> httpd.conf -> change "Listen 80" to "Listen 8080",
+        then use  http://localhost:8080/tala_api/api.php  in the app's server settings.
+
+ MySQL won't start (port 3306 busy)
+     -> Another MySQL is running. Stop it:  Stop-Service MySQL80   (name may differ)
+
+ "Access denied for user 'root'"
+     -> Your MySQL root has a password. Add -p to the commands (you'll be asked for it),
+        and put the password in  C:\xampp\htdocs\tala_api\config.php  (DB_PASS).
+
+ Chrome asks "Allow access to devices on your local network?"
+     -> Click Allow (needed when the app is opened from FlutLab / another port).
+
+ Photos don't show
+     -> The laptop needs internet (photos load from Unsplash).
+
+ Something looks broken after copying the project
+     flutter clean
+     flutter pub get
+     flutter run -d chrome
+
+ Reset everything to the original starting data (deletes all records!)
+     C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4 -e "source xampp/database/tala_hotel.sql"
+================================================================

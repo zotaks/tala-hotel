@@ -1,0 +1,46 @@
+TALA HOTEL - START HERE
+=======================
+
+This folder is the complete project. Extract it to a NEW folder
+(for example Desktop\hotel booking\tala_hotel_v3) instead of copying over an old one.
+All records are stored in the XAMPP MySQL database "tala_hotel".
+
+-------------------------------------------------------------
+1) Create the database (once)
+-------------------------------------------------------------
+   Open the XAMPP Control Panel and START Apache and MySQL.
+   Double-click  1_SETUP_XAMPP.bat
+     - copies the API to C:\xampp\htdocs\tala_api
+     - creates the tala_hotel database (REPLACES an existing one)
+
+-------------------------------------------------------------
+2) Run the app
+-------------------------------------------------------------
+   Double-click  2_RUN_APP.bat   (or: flutter pub get  then  flutter run -d chrome)
+   Everything you do is saved in MySQL - check it in http://localhost/phpmyadmin
+
+-------------------------------------------------------------
+3) Put the finished app inside XAMPP (best for presenting)
+-------------------------------------------------------------
+   Double-click  3_BUILD_FOR_XAMPP.bat  -> opens http://localhost/tala/
+
+-------------------------------------------------------------
+FlutLab.io
+-------------------------------------------------------------
+   Upload pubspec.yaml, the lib folder, the web folder and test\widget_test.dart,
+   press Pub get, then Run (Web). XAMPP must be running on the same PC.
+
+-------------------------------------------------------------
+Starting accounts
+-------------------------------------------------------------
+   Everyone uses the same login page - staff go straight to the dashboard.
+   Each staff account MUST set its own password at first sign-in.
+     Owner       admin@talahotel.ph      / admin123
+     Manager     manager@talahotel.ph    / manager123
+     Front desk  frontdesk@talahotel.ph  / desk1234
+   Sample guest: juan.delacruz@gmail.com / password123
+
+Running it on ANOTHER laptop?  Read RUN_COMMANDS.txt (easy steps:
+4_MAKE_PORTABLE_PACKAGE.bat here, then INSTALL.bat there).
+
+Tests:  flutter test      Details: README.md
